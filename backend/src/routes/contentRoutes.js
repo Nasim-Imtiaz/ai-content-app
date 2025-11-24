@@ -1,6 +1,7 @@
 import express from "express";
 import Content from "../models/Content.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { enqueueContentJob } from "../queue/queue.js";
 
 const router = express.Router();
 
@@ -19,14 +20,50 @@ router.post("/generate-content", authMiddleware, async (req, res) => {
             status: "pending"
         });
 
+        const { jobId, delayMs } = await enqueueContentJob({
+            userId: req.user.id,
+            prompt,
+            contentType,
+            contentId: content._id.toString()
+        });
+
+        content.jobId = jobId.toString();
+        await content.save();
+
         return res
             .status(202)
             .json({
-                message: "Content Created",
+                message: "Job queued",
+                jobId, delayMs,
                 contentId: content._id
             });
     } catch (err) {
-        console.error("Content Creation error", err);
+        console.error("enqueue error", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+router.get("/content/:jobId/status", authMiddleware, async (req, res) => {
+    try {
+        const { jobId } = req.params;
+        const content = await Content.findOne({
+            jobId,
+            user: req.user.id
+        });
+
+        if (!content) {
+            return res.status(404).json({ message: "Job not found" });
+        }
+
+        res.json({
+            status: content.status,
+            generatedText: content.generatedText,
+            prompt: content.prompt,
+            contentType: content.contentType,
+            error: content.error
+        });
+    } catch (err) {
+        console.error("status error", err);
         res.status(500).json({ message: "Server error" });
     }
 });
