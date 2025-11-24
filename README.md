@@ -2,8 +2,8 @@
 ### ToDo:
 - [ ] Dockerize the full project
 - [x] Setup Express and Database Connection (MongoDB)
-- [ ] Add User and Content Model
-- [ ] Authentication and Basic User CRUD
+- [x] Add User and Content Model
+- [x] Authentication and Basic User CRUD
 - [ ] Implement Content CRUD
 - [ ] Add Queue and delayed job enqueuing
 - [ ] Add AI Service to call External API
