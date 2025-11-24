@@ -4,7 +4,7 @@
 - [x] Setup Express and Database Connection (MongoDB)
 - [x] Add User and Content Model
 - [x] Authentication and Basic User CRUD
-- [ ] Implement Content CRUD
+- [x] Implement Content CRUD
 - [ ] Add Queue and delayed job enqueuing
 - [ ] Add AI Service to call External API
 - [ ] Implement worker process
