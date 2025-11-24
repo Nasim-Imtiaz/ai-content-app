@@ -7,7 +7,7 @@
 - [x] Implement Content CRUD
 - [x] Add Queue and delayed job enqueuing
 - [x] Add AI Service to call External API
-- [ ] Implement worker process
+- [x] Implement worker process
 - [ ] Frontend Skeleton
 
 ### Bonus:
