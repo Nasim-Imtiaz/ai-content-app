@@ -1,7 +1,7 @@
 # AI-Powered Content Generator &amp; Management System
 ### ToDo:
 - [ ] Dockerize the full project
-- [ ] Setup Express and Database Connection (MongoDB)
+- [x] Setup Express and Database Connection (MongoDB)
 - [ ] Add User and Content Model
 - [ ] Authentication and Basic User CRUD
 - [ ] Implement Content CRUD
