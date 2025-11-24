@@ -6,7 +6,7 @@
 - [x] Authentication and Basic User CRUD
 - [x] Implement Content CRUD
 - [x] Add Queue and delayed job enqueuing
-- [ ] Add AI Service to call External API
+- [x] Add AI Service to call External API
 - [ ] Implement worker process
 - [ ] Frontend Skeleton
 

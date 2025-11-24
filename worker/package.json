@@ -1,12 +1,18 @@
 {
   "name": "worker",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "worker.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node worker.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "bull": "^4.16.5",
+    "dotenv": "^17.2.3",
+    "mongoose": "^9.0.0",
+    "node-fetch": "^3.3.2"
+  }
 }
