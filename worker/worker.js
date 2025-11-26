@@ -9,6 +9,16 @@ import Content from "./models/Content.js";
 const MONGO_URI = process.env.MONGO_URI || "mongodb://mongo:27017/ai_content";
 const redisUrl = process.env.REDIS_URL || "redis://redis:6379";
 
+async function notifyBackend(jobId) {
+    try {
+        await fetch(`${process.env.BACKEND_INTERNAL_URL}/api/jobs/${jobId}/notify`, {
+            method: "POST"
+        });
+    } catch (err) {
+        console.error("Notify backend failed", err);
+    }
+}
+
 async function start() {
     await mongoose.connect(MONGO_URI);
     console.log("[Worker] Mongo connected");
@@ -35,6 +45,7 @@ async function start() {
             content.error = undefined;
             await content.save();
 
+            await notifyBackend(job.id);
             console.log("[Worker] Job completed", job.id);
             return true;
         } catch (err) {
