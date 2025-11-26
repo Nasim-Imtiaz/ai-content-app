@@ -1,6 +1,7 @@
 'use server'
 
-import { SignupFormSchema, FormState } from '@/app/lib/definitions'
+import {SignupFormSchema, FormState, LoginFormSchema, LoginFormState} from '@/app/lib/definitions'
+import {redirect} from "next/navigation";
 
 export async function signup(
     state: FormState,
@@ -41,14 +42,58 @@ export async function signup(
             }
         }
 
-        return {
-            message: 'User created successfully!',
-        }
     } catch (error) {
         console.error('Signup error:', error)
         return {
             message: 'An error occurred. Please try again later.',
         }
     }
+
+    redirect('/login')
+}
+
+export async function login(
+    state: LoginFormState,
+    formData: FormData
+): Promise<LoginFormState> {
+    const validatedFields = LoginFormSchema.safeParse({
+        email: formData.get('email'),
+        password: formData.get('password'),
+    })
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+        }
+    }
+
+    const { email, password } = validatedFields.data
+
+    try {
+        const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email,
+                password,
+            }),
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            return {
+                message: errorData.message || 'Invalid email or password. Please try again.',
+            }
+        }
+    } catch (error) {
+        console.error('Login error:', error)
+        return {
+            message: 'An error occurred. Please try again later.',
+        }
+    }
+
+    redirect('/')
 }
 
