@@ -85,7 +85,6 @@ router.put("/content/:id", authMiddleware, async (req, res) => {
             return res.status(404).json({ message: "Content not found" });
         }
 
-        // Update only provided fields
         if (prompt !== undefined) {
             content.prompt = prompt;
         }
