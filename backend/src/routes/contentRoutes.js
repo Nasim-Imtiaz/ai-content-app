@@ -35,7 +35,8 @@ router.post("/generate-content", authMiddleware, async (req, res) => {
             .json({
                 message: "Job queued",
                 jobId, delayMs,
-                contentId: content._id
+                contentId: content._id,
+                content
             });
     } catch (err) {
         console.error("enqueue error", err);
@@ -69,8 +70,42 @@ router.get("/content/:jobId/status", authMiddleware, async (req, res) => {
 });
 
 router.get("/content", authMiddleware, async (req, res) => {
-    const contents = await Content.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const contents = await Content.find({ user: req.user.id }).sort({ createdAt: 1 });
     res.json(contents);
+});
+
+router.put("/content/:id", authMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { prompt, contentType, generatedText } = req.body;
+
+        const content = await Content.findOne({ _id: id, user: req.user.id });
+
+        if (!content) {
+            return res.status(404).json({ message: "Content not found" });
+        }
+
+        // Update only provided fields
+        if (prompt !== undefined) {
+            content.prompt = prompt;
+        }
+        if (contentType !== undefined) {
+            content.contentType = contentType;
+        }
+        if (generatedText !== undefined) {
+            content.generatedText = generatedText;
+        }
+
+        await content.save();
+
+        res.json({
+            message: "Content updated",
+            content
+        });
+    } catch (err) {
+        console.error("update content error", err);
+        res.status(500).json({ message: "Server error" });
+    }
 });
 
 router.delete("/content/:id", authMiddleware, async (req, res) => {

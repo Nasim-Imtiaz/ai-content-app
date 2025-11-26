@@ -55,7 +55,7 @@ export default function ContentList() {
             // Update existing content
             const result = await updateContent(editingContent._id, contentData)
             if (result.success && result.data) {
-                updateContentInStore(editingContent._id, result.data)
+                updateContentInStore(editingContent._id, result.data.content)
                 setShowForm(false)
                 setEditingContent(null)
             } else {
@@ -65,7 +65,7 @@ export default function ContentList() {
             // Create new content
             const result = await createContent(contentData)
             if (result.success && result.data) {
-                addContent(result.data)
+                addContent(result.data.content)
                 setShowForm(false)
             } else {
                 throw new Error(result.error || 'Failed to create content')
