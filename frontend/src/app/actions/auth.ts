@@ -2,6 +2,7 @@
 
 import {SignupFormSchema, FormState, LoginFormSchema, LoginFormState} from '@/app/lib/definitions'
 import {redirect} from "next/navigation";
+import {cookies} from "next/headers";
 
 export async function signup(
     state: FormState,
@@ -87,6 +88,26 @@ export async function login(
                 message: errorData.message || 'Invalid email or password. Please try again.',
             }
         }
+
+        const userData = await response.json()
+
+        const accessToken = userData.token
+
+        if (!accessToken) {
+            return {
+                message: 'Login failed: No access token received.',
+            }
+        }
+
+        // Save access token in cookie
+        const cookieStore = await cookies()
+        cookieStore.set('access_token', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7,
+            path: '/',
+        })
     } catch (error) {
         console.error('Login error:', error)
         return {
@@ -95,5 +116,11 @@ export async function login(
     }
 
     redirect('/')
+}
+
+export async function logout() {
+    const cookieStore = await cookies()
+    cookieStore.delete('access_token')
+    redirect('/login')
 }
 
