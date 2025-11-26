@@ -17,6 +17,7 @@ export async function enqueueContentJob({ userId, prompt, contentType, contentId
             contentId
         },
         {
+            jobId: contentId,
             delay: delayMs,
             attempts: 3
         }
