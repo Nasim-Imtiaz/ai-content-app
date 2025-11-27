@@ -9,7 +9,7 @@ export default async function Home() {
 
   return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <div className="w-full max-w-4xl p-8 bg-white dark:bg-zinc-900 rounded-lg shadow-lg">
+        <div className="w-full max-w-7xl p-8 bg-white dark:bg-zinc-900 rounded-lg shadow-lg">
           <SocketProvider token={session.token} />
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-black dark:text-zinc-50">

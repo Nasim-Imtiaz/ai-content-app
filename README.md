@@ -230,3 +230,5 @@ npm start
 - Verify `OPENAI_API_KEY` is set correctly
 - Check your OpenAI account has sufficient credits
 - Ensure the API key has proper permissions
+
+![Final Output](./ScreenShot_1.png)
