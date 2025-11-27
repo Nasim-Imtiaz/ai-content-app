@@ -15,8 +15,16 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"]
-    }
+        methods: ["GET", "POST", "OPTIONS"],
+        credentials: true,
+        allowedHeaders: ["Authorization", "Content-Type"],
+        exposedHeaders: ["Authorization"]
+    },
+    transports: ["websocket", "polling"],
+    allowEIO3: true,
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    connectTimeout: 45000
 });
 
 setSocketIO(io);
@@ -24,32 +32,59 @@ setSocketIO(io);
 const userSockets = new Map();
 
 io.use((socket, next) => {
-    const token = socket.handshake.auth && socket.handshake.auth.token ||
-        socket.handshake.query && socket.handshake.query.token;
-    if (!token) return next(new Error("No token provided"));
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "OPTIMIZELYTOKEN");
-        socket.userId = decoded.id;
-        next();
-    } catch (err) {
-        next(new Error("Invalid token"));
-    }
+    next();
 });
 
 io.on("connection", (socket) => {
-    const userId = socket.userId;
-    if (!userId) return;
-    if (!userSockets.has(userId)) userSockets.set(userId, new Set());
-    userSockets.get(userId).add(socket.id);
-    console.log("Socket connected:", socket.id, "for user", userId);
+    console.log("Socket connection attempt:", socket.id);
 
-    socket.on("disconnect", () => {
-        const set = userSockets.get(userId);
-        if (set) {
-            set.delete(socket.id);
-            if (set.size === 0) userSockets.delete(userId);
+    const token = socket.handshake.auth?.token || 
+                  socket.handshake.query?.token ||
+                  socket.handshake.headers?.authorization?.replace('Bearer ', '');
+    
+    console.log("Token present:", !!token);
+    
+    if (!token) {
+        console.log("Socket connection rejected: No token provided");
+        socket.emit("auth_error", { message: "No token provided" });
+        socket.disconnect();
+        return;
+    }
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "OPTIMIZELYTOKEN");
+        socket.userId = decoded.id;
+        console.log("Socket authenticated for user:", decoded.id);
+
+        if (!userSockets.has(socket.userId)) {
+            userSockets.set(socket.userId, new Set());
         }
-        console.log("Socket disconnected:", socket.id);
+        userSockets.get(socket.userId).add(socket.id);
+        console.log("Socket connected:", socket.id, "for user", socket.userId);
+
+        socket.emit("authenticated", { userId: socket.userId });
+        
+    } catch (err) {
+        console.log("Socket authentication failed: Invalid token", err.message);
+        socket.emit("auth_error", { message: "Invalid token" });
+        socket.disconnect();
+        return;
+    }
+
+    socket.on("disconnect", (reason) => {
+        const userId = socket.userId;
+        if (userId) {
+            const set = userSockets.get(userId);
+            if (set) {
+                set.delete(socket.id);
+                if (set.size === 0) userSockets.delete(userId);
+            }
+        }
+        console.log("Socket disconnected:", socket.id, "reason:", reason);
+    });
+
+    socket.on("error", (error) => {
+        console.error("Socket error for user", socket.userId, ":", error);
     });
 });
 
@@ -61,7 +96,7 @@ function emitJobUpdateToUser(userId, payload) {
     }
 }
 
-setEmitFunction(emitJobUpdateToUser);
+setEmitFunction(emitJobUpdateToUser, userSockets);
 
 async function start() {
     try {
@@ -76,5 +111,3 @@ async function start() {
 }
 
 start();
-
-export default emitJobUpdateToUser;

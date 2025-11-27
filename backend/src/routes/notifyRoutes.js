@@ -1,6 +1,6 @@
 import express from "express";
 import Content from "../models/Content.js";
-import emitJobUpdateToUser from "../server.js";
+import { emitJobUpdateToUser } from "../socket/socket.js";
 
 const router = express.Router();
 

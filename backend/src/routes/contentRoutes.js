@@ -2,6 +2,7 @@ import express from "express";
 import Content from "../models/Content.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { enqueueContentJob } from "../queue/queue.js";
+import { emitJobUpdateToUser } from "../socket/socket.js";
 
 const router = express.Router();
 
@@ -96,6 +97,9 @@ router.put("/content/:id", authMiddleware, async (req, res) => {
         }
 
         await content.save();
+
+        // Emit socket update to user
+        emitJobUpdateToUser(String(req.user.id), content);
 
         res.json({
             message: "Content updated",
