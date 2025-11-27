@@ -8,9 +8,9 @@
 - [x] Add Queue and delayed job enqueuing
 - [x] Add AI Service to call External API
 - [x] Implement worker process
-- [ ] Frontend Skeleton
+- [x] Frontend Skeleton
 
 ### Bonus:
-- [ ] Websocket Usage
+- [x] Websocket Usage
 - [ ] JEST Testing
-- [ ] Zustand Usage for State
+- [x] Zustand Usage for State
