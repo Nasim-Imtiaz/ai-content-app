@@ -5,12 +5,19 @@ import { useState, useEffect } from 'react'
 
 interface ContentFormProps {
     content?: Content | null
-    onSave: (content: { prompt: string; generatedText?: string }) => Promise<void>
+    onSave: (content: { prompt: string; contentType: string; generatedText?: string }) => Promise<void>
     onCancel: () => void
 }
 
+const CONTENT_TYPES = [
+    { value: 'blog-outline', label: 'Blog Post Outline' },
+    { value: 'product-description', label: 'Product Description' },
+    { value: 'social-media-caption', label: 'Social Media Caption' },
+] as const
+
 export default function ContentForm({ content, onSave, onCancel }: ContentFormProps) {
     const [prompt, setPrompt] = useState('')
+    const [contentType, setContentType] = useState<string>('blog-outline')
     const [generatedText, setGeneratedText] = useState('')
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -18,9 +25,11 @@ export default function ContentForm({ content, onSave, onCancel }: ContentFormPr
     useEffect(() => {
         if (content) {
             setPrompt(content.prompt || '')
+            setContentType((content as any).contentType || 'blog-outline')
             setGeneratedText(content.generatedText || '')
         } else {
             setPrompt('')
+            setContentType('blog-outline')
             setGeneratedText('')
         }
     }, [content])
@@ -36,8 +45,13 @@ export default function ContentForm({ content, onSave, onCancel }: ContentFormPr
 
         setIsSaving(true)
         try {
-            await onSave({ prompt: prompt.trim(), generatedText: generatedText.trim() || undefined })
+            await onSave({ 
+                prompt: prompt.trim(), 
+                contentType: contentType,
+                generatedText: generatedText.trim() || undefined 
+            })
             setPrompt('')
+            setContentType('blog-outline')
             setGeneratedText('')
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save content')
@@ -53,6 +67,24 @@ export default function ContentForm({ content, onSave, onCancel }: ContentFormPr
                     {content ? 'Edit Content' : 'Add New Content'}
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label htmlFor="contentType" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                            Content Type *
+                        </label>
+                        <select
+                            id="contentType"
+                            value={contentType}
+                            onChange={(e) => setContentType(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100"
+                            required
+                        >
+                            {CONTENT_TYPES.map((type) => (
+                                <option key={type.value} value={type.value}>
+                                    {type.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <div>
                         <label htmlFor="prompt" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                             Prompt *

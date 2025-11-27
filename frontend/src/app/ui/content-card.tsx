@@ -21,13 +21,31 @@ export default function ContentCard({ content, onEdit, onDelete }: ContentCardPr
         }
     }
 
+    const getContentTypeLabel = (type: string) => {
+        const typeMap: Record<string, string> = {
+            'blog-outline': 'Blog Outline',
+            'product-description': 'Product Description',
+            'social-media-caption': 'Social Media Caption'
+        }
+        return typeMap[type] || type
+    }
+
+    const contentType = (content as any).contentType
+
     return (
         <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-3">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-zinc-100">
-                    {content.prompt}
-                </h3>
-                <div className="flex gap-2">
+                <div className="flex-1">
+                    {contentType && (
+                        <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-md mb-2">
+                            {getContentTypeLabel(contentType)}
+                        </span>
+                    )}
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-zinc-100">
+                        {content.prompt}
+                    </h3>
+                </div>
+                <div className="flex gap-2 ml-2">
                     <button
                         onClick={() => onEdit(content)}
                         className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"

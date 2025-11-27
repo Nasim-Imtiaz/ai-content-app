@@ -50,7 +50,7 @@ export default function ContentList() {
         setShowForm(true)
     }
 
-    const handleSave = async (contentData: { prompt: string; generatedText?: string }) => {
+    const handleSave = async (contentData: { prompt: string; contentType: string; generatedText?: string }) => {
         if (editingContent) {
             // Update existing content
             const result = await updateContent(editingContent._id, contentData)

@@ -39,14 +39,14 @@ export async function fetchContents() {
     }
 }
 
-export async function createContent(content: { prompt: string; generatedText?: string; [key: string]: any }) {
+export async function createContent(content: { prompt: string; contentType: string; generatedText?: string; [key: string]: any }) {
     try {
         const headers = await getAuthHeaders()
         const apiUrl = process.env.NEXT_PUBLIC_API_URL + '/generate-content'
 
         const formData = {
-            ...content,
-            contentType: 'a blog post outline'
+            prompt: content.prompt,
+            contentType: content.contentType
         }
 
         console.log(formData)
