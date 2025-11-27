@@ -1,0 +1,54 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    restart: always
+    env_file: .env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ai_content
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+    ports:
+      - "4000:4000"
+
+  worker:
+    build: ./worker
+    restart: always
+    env_file: .env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ai_content
+      REDIS_URL: redis://redis:6379
+      BACKEND_INTERNAL_URL: http://backend:4000
+    depends_on:
+      - mongo
+      - redis
+      - backend
+
+  frontend:
+    build: ./frontend
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:4000/api
+      NEXT_WS_URL: http://localhost:4000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  mongo-data:
